@@ -1,0 +1,27 @@
+{
+  "name": "interactive-changelog",
+  "version": "1.0.0",
+  "description": "An interactive CLI application that helps generate change logs",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "changelog": "node ./src/index.js",
+    "releaselog": "node ./src/index.js --release"
+  },
+  "keywords": [
+    "changelog",
+    "interactive",
+    "CLI",
+    "markdown"
+  ],
+  "author": "Pushkar DK <pushkar.dk@hotstar.com>",
+  "license": "MIT",
+  "dependencies": {
+    "app-root-path": "^2.2.1",
+    "inquirer": "^6.3.1",
+    "jsdom": "^15.0.0",
+    "showdown": "^1.9.0",
+    "turndown": "^5.0.3"
+  },
+  "devDependencies": {}
+}
