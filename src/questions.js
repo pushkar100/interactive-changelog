@@ -2,7 +2,7 @@ module.exports.qCreateCL = () => {
     return  {
         type: 'confirm',
         name: 'createCL',
-        message: 'Edit/Create a CHANGELOG for this commit?'
+        message: 'Create/Edit a CHANGELOG for this commit?'
     }
 }
 

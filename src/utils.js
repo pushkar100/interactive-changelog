@@ -41,7 +41,7 @@ module.exports.initializeFile = (fs, changelogPath) => {
     return fs
 }
 
-module.exports.fetchExistingChangelog = (fs, changelogPath, encoding) => {
+module.exports.fetchExistingFile = (fs, changelogPath, encoding) => {
     return fs.readFileSync(changelogPath, encoding)
 }
 

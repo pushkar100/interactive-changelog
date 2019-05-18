@@ -1,20 +1,24 @@
 /* Setup:*/
 // Third Party libraries:
-const arguments = Array.from(process.argv)
+const args = Array.from(process.argv)
 const appRoot = require('app-root-path')
 const fs = require('fs')
 const inquirer = require('inquirer')
 const prompt = inquirer.createPromptModule()
+const watch = require('node-watch')
 // Local imports:
 const utils = require('./utils')
 const questions = require('./questions')
 const CONFIG = require('./config')
 const appPackage = require(`${appRoot}/package.json`)
+const bulkJsonEdit = require('./bulk-json-edit')
 
 /* Declarations: */
 const releaseLogCLIOption = '--release'
-const isReleaseLog = arguments[2] === releaseLogCLIOption
-const releaseLogVersion = arguments[3]
+const isReleaseLog = args[2] === releaseLogCLIOption
+const releaseLogVersion = args[3]
+const EARLY_EXIT = 'EARLY_EXIT'
+const BULK_EDIT_IN_PROGRESS = 'BULK_EDIT_IN_PROGRESS'
 const types = {
     ADDED: 'Added',
     CHANGED: 'Changed',
@@ -59,7 +63,7 @@ switch (processDetails.action ) {
             }
             throw new Error(errorExits.NOCREATIONOPTED)
         })
-        .catch(handleErrors)
+        .catch(handleUnusualFlow)
         break
     }
     default:
@@ -67,15 +71,44 @@ switch (processDetails.action ) {
 }
 
 /* Functions: */
-function handleErrors(reason) {
+function handleUnusualFlow(reason) {
     if (reason) {
-        console.log('Premature Exit >', reason)
+        if ([EARLY_EXIT, errorExits.NOCREATIONOPTED].includes(reason.message)) {
+            console.log('[Early exit]')
+            process.exit(0)
+        } else if (BULK_EDIT_IN_PROGRESS === reason.message) {
+            console.log('[Bulk edit in progress]')
+            watchBulkEditFile()
+        } else {
+            console.log('[Erroneous Exit >]', reason)
+            process.exit(1)
+        }
     } else {
-        console.log('Premature Exit')
+        console.log('[Premature exit]')
+        process.exit(0)
     }
 }
 
-function buildTheChangelog() {
+function watchBulkEditFile() {
+    const bulkEditPath = `${appRoot}/${CONFIG.BULK_EDIT_TEMP_FILE}`
+    const watcher = watch(bulkEditPath, { filter: /\.json$/ })
+    watcher.on('change', (evt, name) => {
+        if(evt === 'update') {
+            let data = utils.fetchExistingFile(fs, bulkEditPath, CONFIG.ENCODING)
+            try {
+                entries = JSON.parse(data)
+            } catch (e) {
+                console.log('[Error: Invalid JSON saved in bulk edit! Exiting]')
+                handleUnusualFlow()
+            }
+            watcher.close()
+            fs.unlinkSync(bulkEditPath)
+            buildTheChangelog(true)
+        }
+    })
+}
+
+function buildTheChangelog(doNotConsiderUnreleasedLogs) {
     let existingChangelog
     let unreleasedLogs
     let generatedMarkdown
@@ -83,9 +116,12 @@ function buildTheChangelog() {
     const changelogPath = `${appRoot}/${CONFIG.CHANGELOG_FILE}`
 
     utils.initializeFile(fs, changelogPath)
-    existingChangelog = utils.fetchExistingChangelog(fs, changelogPath, CONFIG.ENCODING)
-    unreleasedLogs = utils.identifyUnreleasedLogs(existingChangelog, CONFIG.MARKDOWN_REGEX)
-    entries = utils.addUnreleasedLogsToEntries(entries, unreleasedLogs)
+    existingChangelog = utils.fetchExistingFile(fs, changelogPath, CONFIG.ENCODING)
+
+    if (!doNotConsiderUnreleasedLogs) {
+        unreleasedLogs = utils.identifyUnreleasedLogs(existingChangelog, CONFIG.MARKDOWN_REGEX)
+        entries = utils.addUnreleasedLogsToEntries(entries, unreleasedLogs)
+    }
 
     generatedMarkdown = utils.generateMarkdownForEntries(
         entries, 
@@ -109,15 +145,34 @@ function buildTheChangelog() {
 
 function interactiveSession() {
     let _logType
-    const logTypePromise = utils.promptTypeOfLog(prompt, questions.qTypeOfLog(types))
+    const additionalChoices = {
+        BULK_EDIT: 'BULK EDIT IN EDITOR',
+        EXIT: 'EXIT!'
+    }
+    const finalOptions = Object.assign({}, types, additionalChoices)
+    const logTypePromise = utils.promptTypeOfLog(prompt, questions.qTypeOfLog(finalOptions))
 
     logTypePromise
     .then(logType => {
         _logType = logType
         if (Object.values(types).includes(_logType)) {
            return utils.promptTypeTheLog(prompt, questions.qTypeTheLog(CONFIG.LOG_MESSAGE_LIMIT))
+        } else if(logType === additionalChoices.EXIT) {
+            throw new Error(EARLY_EXIT)
+        } else if (logType === additionalChoices.BULK_EDIT) {
+            const changelogPath = `${appRoot}/${CONFIG.CHANGELOG_FILE}`
+            const bulkEditPath = `${appRoot}/${CONFIG.BULK_EDIT_TEMP_FILE}`
+            const spacing = 4
+            utils.initializeFile(fs, bulkEditPath)
+            let existingChangelog = utils.fetchExistingFile(fs, changelogPath, CONFIG.ENCODING)
+            let unreleasedLogs = utils.identifyUnreleasedLogs(existingChangelog, CONFIG.MARKDOWN_REGEX)
+            entries = utils.addUnreleasedLogsToEntries(entries, unreleasedLogs)
+            utils.writeToFile(fs, JSON.stringify(entries, null, spacing), bulkEditPath)
+            bulkJsonEdit.openFile(bulkEditPath, () => console.log('[Opened file for bulk edit!]'))
+            throw new Error(BULK_EDIT_IN_PROGRESS)
+        } else {
+            throw new Error(errorExits.UNKNOWNLOGTYPE)
         }
-        throw new Error(errorExits.UNKNOWNLOGTYPE)
     })
     .then(logMessage => {
         if (logMessage) {
@@ -132,5 +187,5 @@ function interactiveSession() {
         } else {
             buildTheChangelog()
         }
-    }).catch(handleErrors)
+    }).catch(handleUnusualFlow)
 }

@@ -15,5 +15,6 @@ module.exports = {
     RELEASE_VERSION_REGEX: /^\d+\.\d+\.\d+$/,
     LOG_MESSAGE_LIMIT: 80,
     CHANGELOG_FILE: 'CHANGELOG.md',
-    ENCODING: 'utf-8'
+    ENCODING: 'utf-8',
+    BULK_EDIT_TEMP_FILE: 'bulk-edit-log.json'
 }

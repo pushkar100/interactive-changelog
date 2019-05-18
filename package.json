@@ -19,9 +19,8 @@
   "dependencies": {
     "app-root-path": "^2.2.1",
     "inquirer": "^6.3.1",
-    "jsdom": "^15.0.0",
-    "showdown": "^1.9.0",
-    "turndown": "^5.0.3"
+    "node-watch": "^0.6.2",
+    "open-in-editor": "^2.2.0"
   },
   "devDependencies": {}
 }
