@@ -1,6 +1,5 @@
 /* Setup:*/
 // Third Party libraries:
-const args = Array.from(process.argv)
 const appRoot = require('app-root-path')
 const fs = require('fs')
 const inquirer = require('inquirer')
@@ -14,9 +13,10 @@ const appPackage = require(`${appRoot}/package.json`)
 const bulkJsonEdit = require('./bulk-json-edit')
 
 /* Declarations: */
-const releaseLogCLIOption = '--release'
-const isReleaseLog = args[2] === releaseLogCLIOption
-const releaseLogVersion = args[3]
+const releaseLogCLIOption = 'release'
+let isReleaseLog
+let releaseLogVersion
+
 const EARLY_EXIT = 'EARLY_EXIT'
 const BULK_EDIT_IN_PROGRESS = 'BULK_EDIT_IN_PROGRESS'
 const types = {
@@ -38,19 +38,22 @@ let entries = {
     _timestamp: ''
 }
 
-/* Actions: */
-interactiveChangelog = {
+/* Actions/exports: */
+const interactiveChangelog = {
     init,
     handleUnusualFlow,
     watchBulkEditFile,
     buildTheChangelog,
     interactiveSession
 }
-interactiveChangelog.init()
+module.exports = interactiveChangelog
 
 /* Functions: */
-function init() {
+function init(releaseLogArg, releaseVersionArg) {
+    isReleaseLog = releaseLogArg === releaseLogCLIOption
+    releaseLogVersion = releaseVersionArg
     entries = utils.createTemplate(entries, types)
+
     const processDetails = utils.startProcess(
             isReleaseLog, 
             releaseLogVersion, 
@@ -159,8 +162,8 @@ function buildTheChangelog(doNotConsiderUnreleasedLogs) {
 function interactiveSession() {
     let _logType
     const additionalChoices = {
-        BULK_EDIT: 'BULK EDIT IN EDITOR',
-        EXIT: 'EXIT!'
+        BULK_EDIT: 'BULK EDIT (In editor)',
+        EXIT: 'EXIT'
     }
     const finalOptions = Object.assign({}, types, additionalChoices)
     const logTypePromise = utils.promptTypeOfLog(prompt, questions.qTypeOfLog(finalOptions))

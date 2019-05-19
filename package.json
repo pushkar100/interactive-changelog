@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "An interactive CLI application that helps generate change logs",
   "main": "src/index.js",
+  "bin": {
+    "lastsummer": "./bin/executable.js"
+  },
+  "preferGlobal": true,
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha './test/**/*.test.js'",
-    "changelog": "node ./src/index.js",
-    "releaselog": "node ./src/index.js --release"
+    "changelog": "node ./bin/executable.js",
+    "releaselog": "node ./bin/executable.js --release"
   },
   "keywords": [
     "changelog",
