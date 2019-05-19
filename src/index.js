@@ -39,35 +39,47 @@ let entries = {
 }
 
 /* Actions: */
-entries = utils.createTemplate(entries, types)
-const processDetails = utils.startProcess(
-        isReleaseLog, 
-        releaseLogVersion, 
-        CONFIG.RELEASE_VERSION_REGEX, 
-        appPackage
-    )
+interactiveChangelog = {
+    init,
+    handleUnusualFlow,
+    watchBulkEditFile,
+    buildTheChangelog,
+    interactiveSession
+}
+interactiveChangelog.init()
 
-switch (processDetails.action ) {
-    case CONFIG.ACTIONS.RELEASE: {
-        entries = utils.addReleaseAndTimeStamp(entries, processDetails.releaseLogVersion)
-        buildTheChangelog()
-        break
+/* Functions: */
+function init() {
+    entries = utils.createTemplate(entries, types)
+    const processDetails = utils.startProcess(
+            isReleaseLog, 
+            releaseLogVersion, 
+            CONFIG.RELEASE_VERSION_REGEX, 
+            appPackage
+        )
+
+    switch (processDetails.action ) {
+        case CONFIG.ACTIONS.RELEASE: {
+            entries = utils.addReleaseAndTimeStamp(entries, processDetails.releaseLogVersion)
+            interactiveChangelog.buildTheChangelog()
+            break
+        }
+        case CONFIG.ACTIONS.PROMPT_CREATION: {
+            const creationPromise = utils.promptCreation(prompt, questions.qCreateCL())
+            creationPromise
+            .then(createCL => {
+                if (createCL) {
+                    interactiveChangelog.interactiveSession()
+                    return true
+                }
+                throw new Error(errorExits.NOCREATIONOPTED)
+            })
+            .catch(interactiveChangelog.handleUnusualFlow)
+            break
+        }
+        default:
+            break
     }
-    case CONFIG.ACTIONS.PROMPT_CREATION: {
-        const creationPromise = utils.promptCreation(prompt, questions.qCreateCL())
-        creationPromise
-        .then(createCL => {
-            if (createCL) {
-                interactiveSession()
-                return true
-            }
-            throw new Error(errorExits.NOCREATIONOPTED)
-        })
-        .catch(handleUnusualFlow)
-        break
-    }
-    default:
-        break
 }
 
 /* Functions: */
@@ -78,7 +90,7 @@ function handleUnusualFlow(reason) {
             process.exit(0)
         } else if (BULK_EDIT_IN_PROGRESS === reason.message) {
             console.log('[Bulk edit in progress]')
-            watchBulkEditFile()
+            interactiveChangelog.watchBulkEditFile()
         } else {
             console.log('[Erroneous Exit >]', reason)
             process.exit(1)
@@ -99,11 +111,11 @@ function watchBulkEditFile() {
                 entries = JSON.parse(data)
             } catch (e) {
                 console.log('[Error: Invalid JSON saved in bulk edit! Exiting]')
-                handleUnusualFlow()
+                interactiveChangelog.handleUnusualFlow()
             }
             watcher.close()
             fs.unlinkSync(bulkEditPath)
-            buildTheChangelog(true)
+            interactiveChangelog.buildTheChangelog(true)
         }
     })
 }
@@ -184,9 +196,9 @@ function interactiveSession() {
     })
     .then(moreLogs => {
         if (moreLogs) {
-            interactiveSession()
+            interactiveChangelog.interactiveSession()
         } else {
-            buildTheChangelog()
+            interactiveChangelog.buildTheChangelog()
         }
-    }).catch(handleUnusualFlow)
+    }).catch(interactiveChangelog.handleUnusualFlow)
 }
