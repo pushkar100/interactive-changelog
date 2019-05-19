@@ -21,7 +21,6 @@
   "author": "Pushkar DK <pushkar.dk@hotstar.com>",
   "license": "MIT",
   "dependencies": {
-    "app-root-path": "^2.2.1",
     "inquirer": "^6.3.1",
     "node-watch": "^0.6.2",
     "open-in-editor": "^2.2.0"

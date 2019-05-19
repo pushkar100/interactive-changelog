@@ -1,6 +1,5 @@
 /* Setup:*/
 // Third Party libraries:
-const appRoot = require('app-root-path')
 const fs = require('fs')
 const inquirer = require('inquirer')
 const prompt = inquirer.createPromptModule()
@@ -9,6 +8,7 @@ const watch = require('node-watch')
 const utils = require('./utils')
 const questions = require('./questions')
 const CONFIG = require('./config')
+const appRoot = process.cwd()
 const appPackage = require(`${appRoot}/package.json`)
 const bulkJsonEdit = require('./bulk-json-edit')
 
