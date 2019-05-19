@@ -134,9 +134,10 @@ function buildTheChangelog(doNotConsiderUnreleasedLogs) {
         CONFIG.MARKDOWN_REGEX, 
         CONFIG.MARKDOWN.UNRELEASED_TAG
     )
-    finalMarkdown = utils.mergeChangelogs(
+    finalMarkdown = utils.mergeStrings(
         generatedMarkdown, 
-        existingChangelog
+        existingChangelog,
+        '\n'
     )
 
     utils.writeToFile(fs, finalMarkdown, changelogPath)

@@ -4,7 +4,7 @@
   "description": "An interactive CLI application that helps generate change logs",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/mocha/bin/mocha './test/**/*.test.js'",
     "changelog": "node ./src/index.js",
     "releaselog": "node ./src/index.js --release"
   },
@@ -22,5 +22,9 @@
     "node-watch": "^0.6.2",
     "open-in-editor": "^2.2.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "sinon": "^7.3.2"
+  }
 }

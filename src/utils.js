@@ -2,6 +2,26 @@
 const _simpleDeepClone = o => JSON.parse(JSON.stringify(o))
 const _doesStringMatchRegex = (str, regex) => typeof str === 'string' && regex.test(str)
 const _isNonEmptyString = str => typeof str === 'string' && str.length > 0
+const removeUnreleasedLogs = (existingChangelog, markdownRegex) => {
+    const delimiter = '\n'
+    let parsingReleased = false
+    return existingChangelog
+        .split(delimiter)
+        .filter(line => {
+            if (markdownRegex.CONTAINS_RELEASE.test(line)) {
+                parsingReleased = true
+            }
+            return parsingReleased
+        }).join(delimiter)
+}
+const removeUnreleasedTag = (existingChangelog, unreleasedTag) => {
+    const delimiter = '\n'
+    return existingChangelog
+        .split(delimiter)
+        .map(line => line.includes(unreleasedTag) ? '' : line)
+        .filter(line => !!line)
+        .join(delimiter)
+}
 
 /* Public methods: */
 module.exports.createTemplate = (entries, types) => {
@@ -107,28 +127,6 @@ module.exports.generateMarkdownForEntries = (entries, privateKeysInEntries, stri
     return result.reverse().join(newLineJoin)
 }
 
-const removeUnreleasedLogs = (existingChangelog, markdownRegex) => {
-    const delimiter = '\n'
-    let parsingReleased = false
-    return existingChangelog
-        .split(delimiter)
-        .filter(line => {
-            if (markdownRegex.CONTAINS_RELEASE.test(line)) {
-                parsingReleased = true
-            }
-            return parsingReleased
-        }).join(delimiter)
-}
-
-const removeUnreleasedTag = (existingChangelog, unreleasedTag) => {
-    const delimiter = '\n'
-    return existingChangelog
-        .split(delimiter)
-        .map(line => line.includes(unreleasedTag) ? '' : line)
-        .filter(line => !!line)
-        .join(delimiter)
-}
-
 module.exports.cleanUpExistingMarkdown = (existingChangelog, markdownRegex, unreleasedTag) => {
     if (_isNonEmptyString(existingChangelog)) {
         const editedLogs = removeUnreleasedLogs(existingChangelog, markdownRegex)
@@ -137,8 +135,8 @@ module.exports.cleanUpExistingMarkdown = (existingChangelog, markdownRegex, unre
     return ''
 }
 
-module.exports.mergeChangelogs = (newMD, oldMD) => {
-    return [newMD, oldMD].join('\n')
+module.exports.mergeStrings = (newMD, oldMD, delimiter) => {
+    return [newMD, oldMD].join(delimiter)
 }
 
 module.exports.writeToFile = (fs, data, changelogPath) => {
