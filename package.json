@@ -1,7 +1,7 @@
 {
-  "name": "interactive-changelog",
+  "name": "lastsummer",
   "version": "1.0.0",
-  "description": "An interactive CLI application that helps generate change logs",
+  "description": "Makes it easy to maintain a changelog for your project with interactivity & bulk editing",
   "main": "src/index.js",
   "bin": {
     "lastsummer": "./bin/executable.js"
@@ -16,7 +16,9 @@
     "changelog",
     "interactive",
     "CLI",
-    "markdown"
+    "markdown",
+    "hooks",
+    "release"
   ],
   "author": "Pushkar DK <pushkar.dk@hotstar.com>",
   "license": "MIT",
