@@ -1,18 +1,21 @@
 /* Setup:*/
 // Third Party libraries:
-const fs = require('fs')
-const inquirer = require('inquirer')
-const prompt = inquirer.createPromptModule()
-const watch = require('node-watch')
+import 'babel-polyfill';
+import fs from 'fs'
+import inquirer from 'inquirer'
+import watch from 'node-watch'
 // Local imports:
-const utils = require('./utils')
-const questions = require('./questions')
-const CONFIG = require('./config')
-const appRoot = process.cwd()
-const appPackage = require(`${appRoot}/package.json`)
-const bulkJsonEdit = require('./bulk-json-edit')
+import utils from './utils'
+import questions from './questions'
+import CONFIG from './config'
+
+import bulkJsonEdit from './bulk-json-edit'
+
 
 /* Declarations: */
+const appRoot = process.cwd()
+const appPackage = utils.loadAppPackage(appRoot)
+const prompt = inquirer.createPromptModule()
 const releaseLogCLIOption = 'release'
 let isReleaseLog
 let releaseLogVersion

@@ -2,15 +2,19 @@
   "name": "lastsummer",
   "version": "1.0.0",
   "description": "Makes it easy to maintain a changelog for your project with interactivity & bulk editing",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "bin": {
     "lastsummer": "./bin/executable.js"
   },
+  "files": [
+    "dist"
+  ],
   "preferGlobal": true,
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha './test/**/*.test.js'",
+    "test": "./node_modules/mocha --compilers js:babel-core/register --require babel-polyfill",
     "changelog": "node ./bin/executable.js",
-    "releaselog": "node ./bin/executable.js --release"
+    "releaselog": "node ./bin/executable.js --release",
+    "build": "webpack"
   },
   "keywords": [
     "changelog",
@@ -28,8 +32,23 @@
     "open-in-editor": "^2.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "chai": "^4.2.0",
+    "clean-webpack-plugin": "^2.0.2",
+    "install": "^0.12.2",
     "mocha": "^6.1.4",
-    "sinon": "^7.3.2"
+    "npm": "^6.9.0",
+    "sinon": "^7.3.2",
+    "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
   }
 }

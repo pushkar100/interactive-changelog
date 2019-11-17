@@ -24,7 +24,11 @@ const removeUnreleasedTag = (existingChangelog, unreleasedTag) => {
 }
 
 /* Public methods: */
-module.exports.createTemplate = (entries, types) => {
+const loadAppPackage = async function (appRoot) {
+  return await import(`${appRoot}/package.json`)
+}
+
+const createTemplate = (entries, types) => {
   const newEntries = _simpleDeepClone(entries)
   for (key in types) {
     newEntries[types[key]] = newEntries[types[key]] || []
@@ -32,7 +36,7 @@ module.exports.createTemplate = (entries, types) => {
   return newEntries
 }
 
-module.exports.startProcess = (isReleaseLog, releaseLogVersion, releaseRegex, appPackage) => {
+const startProcess = (isReleaseLog, releaseLogVersion, releaseRegex, appPackage) => {
   const processDetails = {}
   if (isReleaseLog) {
     processDetails.action = 'RELEASE'
@@ -47,25 +51,25 @@ module.exports.startProcess = (isReleaseLog, releaseLogVersion, releaseRegex, ap
   return processDetails
 }
 
-module.exports.addReleaseAndTimeStamp = (entries, version) => {
+const addReleaseAndTimeStamp = (entries, version) => {
   const newEntries = _simpleDeepClone(entries)
   newEntries['_release'] = `[${version}]`
   newEntries['_timestamp'] = (new Date()).toLocaleString()
   return newEntries
 }
 
-module.exports.initializeFile = (fs, changelogPath) => {
+const initializeFile = (fs, changelogPath) => {
   if (!fs.existsSync(changelogPath)) {
     fs.writeFileSync(changelogPath, '')
   }
   return fs
 }
 
-module.exports.fetchExistingFile = (fs, changelogPath, encoding) => {
+const fetchExistingFile = (fs, changelogPath, encoding) => {
   return fs.readFileSync(changelogPath, encoding)
 }
 
-module.exports.identifyUnreleasedLogs = (currentChangelogMD, markdownRegex) => {
+const identifyUnreleasedLogs = (currentChangelogMD, markdownRegex) => {
   const result = {}
   const delimiter = '\n'
   const multiSpaceRegex = /\s+/
@@ -97,7 +101,7 @@ module.exports.identifyUnreleasedLogs = (currentChangelogMD, markdownRegex) => {
   return result
 }
 
-module.exports.addUnreleasedLogsToEntries = (entries, unreleasedLogs) => {
+const addUnreleasedLogsToEntries = (entries, unreleasedLogs) => {
   const newEntries = _simpleDeepClone(entries)
   for (key in unreleasedLogs) {
     if (key !== 'NA') {
@@ -107,7 +111,7 @@ module.exports.addUnreleasedLogsToEntries = (entries, unreleasedLogs) => {
   return newEntries
 }
 
-module.exports.generateMarkdownForEntries = (entries, privateKeysInEntries, stringForUnreleasedTag, releaseRegex) => {
+const generateMarkdownForEntries = (entries, privateKeysInEntries, stringForUnreleasedTag, releaseRegex) => {
   const listItem = '* '
   const h3Header = '### '
   const h2Header = '## '
@@ -127,7 +131,7 @@ module.exports.generateMarkdownForEntries = (entries, privateKeysInEntries, stri
   return result.reverse().join(newLineJoin)
 }
 
-module.exports.cleanUpExistingMarkdown = (existingChangelog, markdownRegex, unreleasedTag) => {
+const cleanUpExistingMarkdown = (existingChangelog, markdownRegex, unreleasedTag) => {
   if (_isNonEmptyString(existingChangelog)) {
     const editedLogs = removeUnreleasedLogs(existingChangelog, markdownRegex)
     return removeUnreleasedTag(editedLogs, unreleasedTag)
@@ -135,11 +139,11 @@ module.exports.cleanUpExistingMarkdown = (existingChangelog, markdownRegex, unre
   return ''
 }
 
-module.exports.mergeStrings = (newMD, oldMD, delimiter) => {
+const mergeStrings = (newMD, oldMD, delimiter) => {
   return [newMD, oldMD].join(delimiter)
 }
 
-module.exports.writeToFile = (fs, data, changelogPath) => {
+const writeToFile = (fs, data, changelogPath) => {
   const fd = fs.openSync(changelogPath, 'w+')
   const buffer = new Buffer(data)
   fs.writeSync(fd, buffer, 0, buffer.length, 0) // Write new data
@@ -147,27 +151,43 @@ module.exports.writeToFile = (fs, data, changelogPath) => {
   return fs
 }
 
-module.exports.promptCreation = async (prompt, qCreateCL) => {
+const promptCreation = async (prompt, qCreateCL) => {
   const { createCL } = await prompt(qCreateCL)
   return createCL
 }
 
-module.exports.promptTypeOfLog = async (prompt, qTypeOfLog) => {
+const promptTypeOfLog = async (prompt, qTypeOfLog) => {
   const { logType } = await prompt(qTypeOfLog)
   return logType
 }
 
-module.exports.promptTypeTheLog = async (prompt, qTypeTheLog) => {
+const promptTypeTheLog = async (prompt, qTypeTheLog) => {
   const { inputForLog } = await prompt(qTypeTheLog)
   return inputForLog
 }
 
-module.exports.promptMoreLogs = async (prompt, qMoreLogs) => {
+const promptMoreLogs = async (prompt, qMoreLogs) => {
   const { moreLogs } = await prompt(qMoreLogs)
   return moreLogs
 }
 
+const utils = {
+  loadAppPackage,
+  createTemplate,
+  startProcess,
+  addReleaseAndTimeStamp,
+  initializeFile,
+  fetchExistingFile,
+  identifyUnreleasedLogs,
+  addUnreleasedLogsToEntries,
+  generateMarkdownForEntries,
+  cleanUpExistingMarkdown,
+  mergeStrings,
+  writeToFile,
+  promptCreation,
+  promptTypeOfLog,
+  promptTypeTheLog,
+  promptMoreLogs
+}
 
-
-
-
+export default utils

@@ -10,4 +10,4 @@ const bulkJsonEdit = {
   }
 }
 
-module.exports = bulkJsonEdit
+export default bulkJsonEdit

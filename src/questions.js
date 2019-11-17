@@ -1,4 +1,4 @@
-module.exports.qCreateCL = () => {
+const qCreateCL = () => {
   return  {
     type: 'confirm',
     name: 'createCL',
@@ -6,7 +6,7 @@ module.exports.qCreateCL = () => {
   }
 }
 
-module.exports.qTypeOfLog = types => {
+const qTypeOfLog = types => {
   return {
     type: 'list',
     name: "logType",
@@ -15,7 +15,7 @@ module.exports.qTypeOfLog = types => {
   }
 }
 
-module.exports.qTypeTheLog = logMessageLimit => {
+const qTypeTheLog = logMessageLimit => {
   return {
     type: 'input',
     name: 'inputForLog',
@@ -29,10 +29,19 @@ module.exports.qTypeTheLog = logMessageLimit => {
   }
 }
 
-module.exports.qMoreLogs = () => {
+const qMoreLogs = () => {
   return {
     type: 'confirm',
     name: 'moreLogs',
     message: 'Set more logs?'
   }
 }
+
+const questions = {
+  qCreateCL,
+  qTypeOfLog,
+  qTypeTheLog,
+  qMoreLogs
+}
+
+export default questions

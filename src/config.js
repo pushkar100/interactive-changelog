@@ -1,4 +1,4 @@
-module.exports = {
+const CONFIG = {
   ACTIONS: {
     RELEASE: 'RELEASE',
     PROMPT_CREATION: 'PROMPT_CREATION'
@@ -18,3 +18,5 @@ module.exports = {
   ENCODING: 'utf-8',
   BULK_EDIT_TEMP_FILE: 'bulk-edit-log.json'
 }
+
+export default CONFIG
